@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semantic Join Demo — yorph-data-analyst</title>
+<style>
+  :root {
+    --bg-page: #ffffff;
+    --bg-subtle: #f6f8fa;
+    --bg-inset: #eaeef2;
+    --border: #d0d7de;
+    --border-muted: #d8dee4;
+    --fg-default: #1f2328;
+    --fg-muted: #656d76;
+    --fg-subtle: #6e7781;
+    --accent: #0969da;
+    --accent-emphasis: #0550ae;
+    --success: #1a7f37;
+    --success-subtle: #dafbe1;
+    --danger: #cf222e;
+    --danger-subtle: #ffebe9;
+    --attention: #9a6700;
+    --attention-subtle: #fff8c5;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-page);
+    color: var(--fg-default);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1012px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+  @media (max-width: 768px) { .container { padding: 0 16px; } }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 85%;
+    background: var(--bg-subtle);
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+
+  /* ──────────────────────── HEADER ──────────────────────── */
+  header.page-header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-page);
+  }
+  .header-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .header-title .muted { color: var(--fg-muted); font-weight: 400; }
+  .header-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+
+  /* ──────────────────────── HERO ──────────────────────── */
+  .hero {
+    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-kicker {
+    font-size: 12px;
+    color: var(--fg-muted);
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+  }
+  .hero h1 {
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 16px;
+    max-width: 760px;
+  }
+  .hero-sub {
+    font-size: 16px;
+    color: var(--fg-muted);
+    max-width: 680px;
+    margin-bottom: 24px;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 24px;
+  }
+  @media (max-width: 700px) { .hero-stats { grid-template-columns: 1fr; } }
+  .hero-stat {
+    background: var(--bg-page);
+    padding: 16px 20px;
+  }
+  .hero-stat-num {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .hero-stat-num.good { color: var(--success); }
+  .hero-stat-num.bad { color: var(--fg-subtle); text-decoration: line-through; }
+  .hero-stat-label {
+    font-size: 12px;
+    color: var(--fg-muted);
+    margin-top: 4px;
+  }
+
+  /* ──────────────────────── SECTION ──────────────────────── */
+  section {
+    padding: 40px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--fg-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .section-sub {
+    font-size: 14px;
+    color: var(--fg-muted);
+    margin-bottom: 24px;
+    max-width: 720px;
+  }
+
+  /* ──────────────────────── BEFORE/AFTER ──────────────────────── */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+  @media (max-width: 768px) { .problem-grid { grid-template-columns: 1fr; } }
+
+  .problem-box {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-page);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .problem-box-head {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-subtle);
+    color: var(--fg-default);
+  }
+  .problem-row {
+    padding: 6px 12px;
+    border-top: 1px solid var(--border-muted);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .problem-row.header-row {
+    background: var(--bg-subtle);
+    font-size: 11px;
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .problem-row:first-of-type { border-top: none; }
+  .messy { color: var(--danger); }
+  .clean { color: var(--success); }
+
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--fg-muted);
+  }
+  .arrow-col svg { color: var(--fg-muted); }
+  .arrow-col span {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-muted);
+  }
+  @media (max-width: 768px) { .arrow-col { padding: 12px 0; } }
+
+  /* ──────────────────────── METRICS ──────────────────────── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 700px) { .metrics-grid { grid-template-columns: 1fr 1fr; } }
+  .metric-box {
+    background: var(--bg-page);
+    padding: 20px;
+  }
+  .metric-num {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .metric-num.good { color: var(--success); }
+  .metric-num.bad { color: var(--fg-subtle); text-decoration: line-through; }
+  .metric-num.neutral { color: var(--fg-default); }
+  .metric-label {
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.4;
+  }
+
+  /* ──────────────────────── SEARCH CARDS ──────────────────────── */
+  .search-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 768px) { .search-grid { grid-template-columns: 1fr; } }
+  .search-card {
+    background: var(--bg-page);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .search-mock {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-subtle);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  .search-mock-icon {
+    color: var(--fg-muted);
+    font-size: 14px;
+  }
+  .search-mock-term {
+    color: var(--fg-default);
+    font-weight: 600;
+  }
+  .search-mock-label {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+  }
+  .search-body { padding: 16px; }
+  .search-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .search-col {
+    background: var(--bg-page);
+    padding: 14px;
+  }
+  .search-col-label {
+    font-size: 11px;
+    color: var(--fg-muted);
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+  }
+  .search-col-num {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .search-col-num.bad { color: var(--fg-subtle); }
+  .search-col-num.good { color: var(--success); }
+  .search-col-sub {
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+  .search-col-sub.delta { color: var(--success); font-family: var(--font-mono); }
+  .search-missed-label {
+    font-size: 12px;
+    color: var(--fg-muted);
+    margin-bottom: 6px;
+  }
+  .search-missed-list {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--danger);
+    background: var(--danger-subtle);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    line-height: 1.7;
+  }
+
+  /* ──────────────────────── HOW IT WORKS ──────────────────────── */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 768px) { .phases { grid-template-columns: 1fr; } }
+  .phase {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    background: var(--bg-page);
+  }
+  .phase-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-muted);
+    margin-bottom: 4px;
+  }
+  .phase-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .phase p {
+    font-size: 13px;
+    color: var(--fg-muted);
+    margin-bottom: 12px;
+  }
+  .phase-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-muted);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+
+  /* ──────────────────────── CHALLENGES ──────────────────────── */
+  .challenge-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 768px) { .challenge-list { grid-template-columns: 1fr; } }
+  .challenge-item {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    background: var(--bg-page);
+  }
+  .challenge-item.summary {
+    background: var(--success-subtle);
+    border-color: var(--success);
+  }
+  .challenge-item-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-muted);
+    margin-bottom: 4px;
+  }
+  .challenge-item.summary .challenge-item-label { color: var(--success); }
+  .challenge-item-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .challenge-item p {
+    font-size: 13px;
+    color: var(--fg-muted);
+    margin-bottom: 10px;
+  }
+  .challenge-example {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-default);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    line-height: 1.7;
+  }
+  .challenge-example .arrow { color: var(--fg-muted); }
+
+  /* ──────────────────────── CALLOUT ──────────────────────── */
+  .callout {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+    margin: 32px 0;
+    text-align: center;
+  }
+  .callout-quote {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--fg-default);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .callout-attr {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+
+  /* ──────────────────────── FOOTER ──────────────────────── */
+  footer {
+    padding: 24px 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--fg-muted);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 600px) {
+    footer { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="header-title">yorph-data-analyst <span class="muted">/ showcase / semantic-join</span></div>
+</header>
+
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-kicker">Feature showcase · yorph-semantic-join</div>
+  <h1>Same thing, many ways — all matched.</h1>
+  <p class="hero-sub">
+    People type product names however they want — shorthand, abbreviations, descriptive words, whatever's fastest.
+    No two entries match exactly. Yorph's semantic join figures out what they all mean and resolves them to the
+    official catalog at 94% accuracy.
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num bad">0%</div>
+      <div class="hero-stat-label">Exact matches<br>in the raw data</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num good">99.9%</div>
+      <div class="hero-stat-label">Entries matched<br>by semantic join</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num good">94.4%</div>
+      <div class="hero-stat-label">Of those matches,<br>correct</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section>
+  <div class="section-label">The problem</div>
+  <div class="section-title">Same products, dozens of ways. Zero matches.</div>
+  <div class="section-sub">
+    Real-shape sales data where every entry is typed by hand — some use abbreviations, some describe by size or flavor,
+    some just guess. Not a single entry matches the official catalog exactly.
+  </div>
+
+  <div class="problem-grid">
+    <div class="problem-box">
+      <div class="problem-box-head">sales_transactions.csv — as originally entered</div>
+      <div class="problem-row header-row"><span>txn_id</span><span>product_name_entered</span><span>qty</span></div>
+      <div class="problem-row"><span>TXN-00003</span><span class="messy">Coke Zero 12pk</span><span>8</span></div>
+      <div class="problem-row"><span>TXN-00005</span><span class="messy">frosted flakes lg box</span><span>6</span></div>
+      <div class="problem-row"><span>TXN-00006</span><span class="messy">doritos CR 9oz</span><span>4</span></div>
+      <div class="problem-row"><span>TXN-00007</span><span class="messy">Oreos double stuf</span><span>2</span></div>
+      <div class="problem-row"><span>TXN-00009</span><span class="messy">tropicana OJ no pulp 52</span><span>23</span></div>
+      <div class="problem-row"><span>TXN-00015</span><span class="messy">ORIO 14.3OZ</span><span>11</span></div>
+      <div class="problem-row"><span>TXN-00022</span><span class="messy">cliff bar choc chip 6pk</span><span>5</span></div>
+      <div class="problem-row"><span>TXN-00031</span><span class="messy">DRTIOS NCH 9OZ</span><span>3</span></div>
+    </div>
+
+    <div class="arrow-col">
+      <svg width="36" height="16" viewBox="0 0 36 16" fill="none">
+        <line x1="0" y1="8" x2="28" y2="8" stroke="currentColor" stroke-width="1.5"/>
+        <polyline points="22,3 32,8 22,13" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+
+    <div class="problem-box">
+      <div class="problem-box-head">Enriched — matched to product catalog</div>
+      <div class="problem-row header-row"><span>entered</span><span>matched_official_name</span><span>conf.</span></div>
+      <div class="problem-row"><span class="messy">Coke Zero 12pk</span><span class="clean">Coca‑Cola Zero Sugar 12‑Pack Cans</span><span class="clean">high</span></div>
+      <div class="problem-row"><span class="messy">frosted flakes lg box</span><span class="clean">Frosted Flakes 24oz</span><span class="clean">high</span></div>
+      <div class="problem-row"><span class="messy">doritos CR 9oz</span><span class="clean">Doritos Cool Ranch 9.25oz</span><span class="clean">high</span></div>
+      <div class="problem-row"><span class="messy">Oreos double stuf</span><span class="clean">Oreo Double Stuf Cookies 15.35oz</span><span class="clean">high</span></div>
+      <div class="problem-row"><span class="messy">tropicana OJ no pulp 52</span><span class="clean">Tropicana Orange Juice No Pulp 52oz</span><span class="clean">high</span></div>
+      <div class="problem-row"><span class="messy">ORIO 14.3OZ</span><span class="clean">Oreo Original Cookies 14.3oz</span><span class="clean">high</span></div>
+      <div class="problem-row"><span class="messy">cliff bar choc chip 6pk</span><span class="clean">Clif Bar Chocolate Chip 6ct</span><span class="clean">high</span></div>
+      <div class="problem-row"><span class="messy">DRTIOS NCH 9OZ</span><span class="clean">Doritos Nacho Cheese 9.25oz</span><span class="clean">high</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT THIS UNLOCKS -->
+<section>
+  <div class="section-label">What this unlocks</div>
+  <div class="section-title">"How much Honey Nut Cheerios did we sell?" — now answerable.</div>
+  <div class="section-sub">
+    A plain keyword search on the raw data only catches entries where someone wrote the name out in full.
+    Everyone else — the abbreviators, the shorthand-typers — gets dropped silently. The semantic join recovers all of them.
+  </div>
+
+  <div class="search-grid">
+
+    <div class="search-card">
+      <div class="search-mock">
+        <span class="search-mock-icon">🔍</span>
+        <span class="search-mock-term">Honey Nut Cheerios</span>
+        <span class="search-mock-label">product search</span>
+      </div>
+      <div class="search-body">
+        <div class="search-compare">
+          <div class="search-col">
+            <div class="search-col-label">Without semantic join</div>
+            <div class="search-col-num bad">$284</div>
+            <div class="search-col-sub">catches ~40% of true matches</div>
+          </div>
+          <div class="search-col">
+            <div class="search-col-label">With semantic join</div>
+            <div class="search-col-num good">$712</div>
+            <div class="search-col-sub delta">+$428 · +151%</div>
+          </div>
+        </div>
+        <div class="search-missed-label">Entries the keyword search missed:</div>
+        <div class="search-missed-list">
+          HN Cheerios 18oz · hny nt cheer · HN chrios lg · cheerios HN 18oz
+        </div>
+      </div>
+    </div>
+
+    <div class="search-card">
+      <div class="search-mock">
+        <span class="search-mock-icon">🔍</span>
+        <span class="search-mock-term">Orange Juice</span>
+        <span class="search-mock-label">product search</span>
+      </div>
+      <div class="search-body">
+        <div class="search-compare">
+          <div class="search-col">
+            <div class="search-col-label">Without semantic join</div>
+            <div class="search-col-num bad">$418</div>
+            <div class="search-col-sub">catches ~40% of true matches</div>
+          </div>
+          <div class="search-col">
+            <div class="search-col-label">With semantic join</div>
+            <div class="search-col-num good">$1,062</div>
+            <div class="search-col-sub delta">+$644 · +154%</div>
+          </div>
+        </div>
+        <div class="search-missed-label">Entries the keyword search missed:</div>
+        <div class="search-missed-list">
+          tropicana OJ no pulp 52 · OJ 52oz · TRP OJ LG · trop orange 52
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CHALLENGES -->
+<section>
+  <div class="section-label">What it had to figure out</div>
+  <div class="section-title">Four kinds of mess, all mixed together.</div>
+  <div class="section-sub">The dataset was built to cover the ways people actually type product names — not just typos, but the deeper stuff that nothing based on letter-matching can solve.</div>
+
+  <div class="challenge-list">
+
+    <div class="challenge-item">
+      <div class="challenge-item-label">~75% of entries</div>
+      <div class="challenge-item-title">Abbreviations with no shared letters</div>
+      <p>Reps use initials and shorthand that share almost nothing in common with the full name. Letter-matching can't bridge this gap — it has to <em>know</em> what the short form means.</p>
+      <div class="challenge-example">
+        "HN Cheerios 18oz" <span class="arrow">→</span> Cheerios Honey Nut 18.8oz<br>
+        "Tylenol ES 100ct" <span class="arrow">→</span> Tylenol Extra Strength 500mg 100ct<br>
+        "OJ no pulp 52" <span class="arrow">→</span> Tropicana Orange Juice No Pulp 52oz
+      </div>
+    </div>
+
+    <div class="challenge-item">
+      <div class="challenge-item-label">~20% of entries</div>
+      <div class="challenge-item-title">Descriptions instead of sizes</div>
+      <p>People describe products the way they remember them — "small can", "large box" — instead of looking up the exact size. The join has to map descriptive words to specific SKUs.</p>
+      <div class="challenge-example">
+        "Red Bull small can" <span class="arrow">→</span> Red Bull Energy Drink 8.4oz<br>
+        "frosted flakes lg box" <span class="arrow">→</span> Frosted Flakes 24oz
+      </div>
+    </div>
+
+    <div class="challenge-item">
+      <div class="challenge-item-label">~40% of entries</div>
+      <div class="challenge-item-title">Brand names written many ways</div>
+      <p>Brand names get abbreviated, misspelled, or skipped entirely. The system has to recognize that different spellings refer to the same company's product.</p>
+      <div class="challenge-example">
+        "cliff bar choc chip 6pk" <span class="arrow">→</span> Clif Bar Chocolate Chip 6ct<br>
+        "smuckers straw jam 18oz" <span class="arrow">→</span> Smucker's Strawberry Jam 18oz
+      </div>
+    </div>
+
+    <div class="challenge-item">
+      <div class="challenge-item-label">~3% of entries</div>
+      <div class="challenge-item-title">Genuinely unclear entries</div>
+      <p>Some entries can't be resolved for sure — and the system flags those honestly instead of guessing. Low-confidence rows go to human review, not the final total.</p>
+      <div class="challenge-example">
+        "diet cola 12pk" <span class="arrow">→</span> Diet Coke <em>or</em> Diet Pepsi?<br>
+        "cola 12 pack" <span class="arrow">→</span> flagged · needs human review
+      </div>
+    </div>
+
+    <div class="challenge-item summary">
+      <div class="challenge-item-label">Confidence breakdown</div>
+      <div class="challenge-item-title">Honest scoring, not just a match</div>
+      <p>Every resolution includes a confidence score and a runner-up candidate. Low-confidence rows are surfaced for review — not silently wrong.</p>
+      <div class="challenge-example">
+        High confidence (auto-accept): <span class="arrow">~89%</span><br>
+        Medium confidence:             <span class="arrow">~5%</span><br>
+        Low confidence (flagged):      <span class="arrow">~6%</span><br>
+        Unmatched:                     <span class="arrow">&lt;1%</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-label">How it works</div>
+  <div class="section-title">Three stages. No per-row LLM calls.</div>
+  <div class="section-sub">
+    The smart part — knowing that "HN" means "Honey Nut" — is figured out once, up front, from the catalog and a few samples.
+    After that, every row goes through fast, cheap, deterministic code. It scales to millions of rows without breaking the budget.
+  </div>
+  <div class="phases">
+    <div class="phase">
+      <div class="phase-num">Stage 1</div>
+      <div class="phase-title">Clean up the text</div>
+      <p>Expand abbreviations, fix casing, and apply domain-specific rules. "HN" becomes "Honey Nut", "lg box" becomes "large", "OJ" becomes "Orange Juice" — before any matching begins.</p>
+      <div class="phase-tag">rules · regex · abbreviation dictionary</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">Stage 2</div>
+      <div class="phase-title">Find likely matches</div>
+      <p>Compare the cleaned-up entry against the catalog using word-level and character-level similarity. This narrows the catalog down to the top few candidates — fast, without calling any AI model.</p>
+      <div class="phase-tag">TF-IDF · word + character n-grams</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">Stage 3</div>
+      <div class="phase-title">Pick the winner — or flag it</div>
+      <p>Boost candidates that match on brand, size, or flavor signals. If one candidate clearly wins, accept it. If two are too close to call, flag the row for human review instead of guessing silently.</p>
+      <div class="phase-tag">heuristic re-ranking · confidence scoring</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-quote">
+      Zero exact matches. 94% accuracy. No letter-matching method comes close.
+    </div>
+    <div class="callout-attr">Semantic join demo · CPG sales dataset</div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <span>yorph-data-analyst · <code>yorph-semantic-join</code> showcase</span>
+  <span>CPG sales dataset</span>
+</footer>
+
+</body>
+</html>

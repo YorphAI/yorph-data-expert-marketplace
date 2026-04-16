@@ -1,0 +1,16 @@
+{
+  "name": "yorph-data-expert",
+  "owner": {
+    "name": "Yorph AI"
+  },
+  "plugins": [
+    {
+      "name": "yorph-data-analyst",
+      "source": "./plugins/yorph-data-analyst",
+      "description": "End-to-end data transformation and analysis pipeline for non-technical users. Two-agent architecture: an Orchestrator that handles all user communication, planning, and delivery; and a Pipeline Builder that handles technical data work in the background.",
+      "author": {
+        "name": "Yorph AI"
+      }
+    }
+  ]
+}
